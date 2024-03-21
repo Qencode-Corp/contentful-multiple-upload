@@ -1,0 +1,114 @@
+.container{
+    border: 1px solid #ebebeb;
+    border-radius: 5px;
+    margin: 7px 0;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 6px 11px;
+    padding-bottom: 3px;
+    background-color: white;
+}
+
+.container.completed{
+    border-color: transparent;
+    background-color: #f4faf8;
+}
+
+.content{
+    display: flex;
+    align-items: center;
+    flex-direction: column;  
+    max-width: 500px;    
+    width: 100%;
+    position: relative;
+}
+
+.content.completed .progress{
+    color: #2db272;
+}
+
+.content.completed .loaded{
+    background-color: #2db272;;
+}
+
+.progress{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: capitalize;
+    color: #316fea;
+    font-weight: 500;
+    font-size: 16px;
+    margin-left: 7px;
+    font-size: 14px;
+}
+
+.container.completed .progress{
+    color: #75ba2e;
+    text-transform: none;
+    margin-bottom: 23px;
+}
+
+.loader {
+    margin-left: 13px;
+    margin-right: 7px;
+    width: 15px;
+    height: 15px;
+    display: block;
+    max-width: 15px;
+    max-height: 15px; 
+}
+
+.progressBar{
+    height: 6px;
+    background-color: #ccdaff;
+    width: 100%;
+    border-radius: 7px;
+}
+
+.loaded{
+    height: 6px;
+    background-color: #316fea;
+    border-radius: 7px;
+}
+
+.content p{
+    text-align: center;
+    margin: 0;
+    color: #5c677c;
+    font-size: 15px;
+}
+
+.done{
+    width: 36px;
+    height: 36px;
+    margin-bottom: 13px;
+}
+
+.progressContainer{
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.templateName{
+    width: 100%;
+    color: #1e1c4e;
+    font-weight: 500;
+    font-size: 14px;  
+}
+
+.templateName span{
+    color: #c9cacb;
+    font-weight: 400;
+    font-size: 12px;    
+}
+
+.errorIcon{
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    right: -5px;
+    top: -2px;
+}

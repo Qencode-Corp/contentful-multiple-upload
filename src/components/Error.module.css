@@ -1,0 +1,30 @@
+.container{
+    width: 100%;
+}
+
+.message{
+    word-wrap: break-word;
+    font-size: 14px;
+}
+
+.open{
+    background: red;
+}
+
+.title{
+    color: #e3241b;
+    display: flex;
+    align-items: center;    
+    font-weight: 400;
+    font-size: 14px;    
+    margin-top: 3px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.title svg{
+    width: 7px;
+    height: 7px;
+    fill: #e3241b;
+    margin-right: 5px;
+}

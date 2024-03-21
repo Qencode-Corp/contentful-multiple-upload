@@ -1,0 +1,343 @@
+.container{
+    padding: 20px 80px;
+    /* font-family: proxima-nova; */
+}
+
+.container section{
+    padding-bottom: 40px;
+}
+
+.container h2{
+    color: #4b5c79;
+    font-size: 23px;
+    font-weight: 500;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;    
+}
+
+.container h2 > span{
+    display: inline-block;
+    background-color: #929cb0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: #fff;
+    text-align: center;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    margin-right: 14px;    
+}
+
+.validationBox{
+    padding: 20px 30px;
+    border: 1px solid #dae0ea;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.validationBox input{
+    padding: 0 15px;
+    margin: 0;
+    display: inline-block;
+    box-sizing: border-box;
+    outline: none;
+    border: 1px solid #c4c8d2;
+    border-radius: 6px;
+    color: #4486e6;
+    font-weight: 500;
+    line-height: 40px;
+    font-size: 14px;   
+    margin-right: 14px;
+    max-width: 220px; 
+}
+
+.validationBox input:disabled{
+    background-color: #f6f9ff;
+    border-color: #f6f9ff;
+}
+
+.validationBox input.error{
+    border-color: red;
+}
+
+.errorMessage{
+    color: red;
+    position: absolute;
+    bottom: -18px;
+    font-size: 13px;
+}
+
+.validationBox label{
+    color: #4d5f80;    
+    font-size: 14px;
+}
+
+.inputContainer{
+    display: flex;  
+    align-items: center; 
+    margin: 8px 0;
+    position: relative;
+}
+
+.validationBox button{
+    outline: none;
+    display: inline-block;
+    padding: 0 22px;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: none;
+    line-height: 40px;
+    
+
+    background-color: #e9f0fc;
+    color: #3f79e4;
+    font-weight: 500;
+    line-height: 33px;
+    font-size: 15px;    
+    border-radius: 25px;
+    min-width: 110px;
+
+    display: flex;
+    align-items: center;    
+    text-align: center;
+    justify-content: center;
+}
+
+.validationBox button:hover {
+    background-color: #d8e7ff;
+    box-shadow: 0px 1px 6px 1px rgba(105, 109, 112, 0.1);
+}
+
+.validationBox button + button{
+    margin-left: 8px;
+}
+
+.validationBox button svg{
+    height: 15px;
+    width: 15px;
+    margin-left: 5px;    
+    fill: #3f79e4;
+}
+
+
+.templateContainer{
+    padding: 20px 30px;
+    border: 1px solid #e4e7f1;
+    border-radius: 5px;
+    margin: 15px 0;    
+    background-color: #f9f9fa;
+}
+
+.templateContainer.enabled{
+    background-color: #f6f9ff;
+    border-color: #b4ccfe;
+}
+
+
+.checkboxSwitchContainer{
+    height: 22px;
+    display: flex;
+    align-items: center;    
+}
+
+.checkboxSwitchContainer label {
+    display: flex;
+    align-items: center;
+    width: 40px;
+    min-width: 40px;
+    height: 14px;
+    margin: 0;    
+    position: relative;
+}
+
+.checkboxSwitchContainer input {
+    display: none;
+}
+
+.checkboxSwitchContainer .checkboxSwitchSlider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e8eaed;
+    -webkit-transition: .1s;
+    transition: .1s;
+    border-radius: 34px;
+}
+
+.checkboxSwitchContainer .checkboxSwitchSlider:before {
+    position: absolute;
+    content: "";
+
+    background-color: #9ea2ae;
+    -webkit-transition: .1s;
+    transition: .1s;
+    border-radius: 50%;
+
+    height: 20px;
+    width: 20px;
+    left: 0px;
+    bottom: -2px;    
+}
+
+.checkboxSwitchContainer input:checked + .checkboxSwitchSlider{
+    background-color: #e5eeff;
+}
+
+.checkboxSwitchContainer input:checked + .checkboxSwitchSlider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+    background-color: #306eea;
+}
+
+.templateHeader{
+    display: flex;
+}
+
+.templateHeader > div:first-of-type{
+    width: 250px;
+    min-width: 250px;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid #e7eaed;
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+
+.templateHeader > div + div{
+    margin-left: 30px;
+}
+
+.templateTitle{
+    color: #9ea2ae;
+    margin-left: 15px;
+    font-size: 16px;
+}
+
+.templateContainer.enabled .templateTitle{
+    color: #306eea;
+}
+
+.templateContainer.enabled .templateHeader > div:first-of-type{
+    border-right: 1px solid #b4ccfe;
+}
+
+.templateBody{
+    margin-top: 20px;
+    display: flex;
+}
+
+.templateBody > div{
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;    
+    flex: 1;
+}
+
+.templateBody > div:first-of-type{
+    width: 250px;   
+    max-width: 250px;
+}
+
+.templateBody > div + div{
+    margin-left: 30px;
+}
+
+.templateBody input{
+    padding: 0 15px;
+    margin: 0;
+    display: inline-block;
+    box-sizing: border-box;
+    outline: none;
+    border: 1px solid #c4c8d2;
+    border-radius: 6px;
+    font-weight: 500;
+    line-height: 40px;
+    font-size: 14px;
+    margin-right: 14px;  
+    margin: 8px 0;
+}
+
+.templateBody label{
+    color: #4d5f80;
+    font-size: 14px;    
+}
+
+.formatListContainer{
+    display: flex;
+    flex-wrap: wrap;
+    margin: -2.5px;
+}
+
+
+.formatOutput, 
+.formatVideoCodec,
+.formatWidth{
+    background-color: white;
+    border: 1px solid;
+    border-radius: 5px;
+    padding: 0px 8px;
+    line-height: 23px;
+    text-transform: uppercase;
+    font-size: 15px;      
+    margin: 2.5px;
+}
+
+.formatOutput{
+    color: #306eea;
+    border-color: #b3ccfe;
+}
+
+.formatVideoCodec{
+    color: #43b454;
+    border-color: #43b454;
+}
+
+.formatWidth{
+    color: #8d9eca;
+    border-color: #8d9eca;
+}
+
+.noTemplates{
+    padding: 20px 30px;
+    border: 1px solid #b4ccfe;
+    border-radius: 5px;
+    margin: 15px 0;
+    
+    background-color: #f6f9ff; 
+    text-align: center;
+}
+
+.templateIcon{
+    height: 64px;
+    margin: 5px auto;
+}
+
+.noTemplates p{
+    font-size: 16px;
+    font-weight: 500;
+    margin: 6px 0;    
+}
+
+.noTemplates a{
+    color: #3e87ee;
+    text-decoration: none;
+}
+
+.noTemplates a:hover{
+    color: #3e87ee;
+    text-decoration: underline;
+}

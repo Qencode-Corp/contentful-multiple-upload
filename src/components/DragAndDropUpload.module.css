@@ -1,0 +1,12 @@
+.container{
+    border: 2px dashed;
+    border-color: #CFD9E0;
+    padding: 20px;
+    border-radius: 5px; 
+    cursor: pointer;
+    min-height: 200px;
+}
+
+.highlight{
+    border-color: #0059C8;
+}

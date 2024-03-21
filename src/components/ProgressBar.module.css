@@ -1,0 +1,23 @@
+/* ProgressBar.module.css */
+.progressBarContainer {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 4px 0;
+  }
+  
+  .progressBarFill {
+    /* height: 20px; */
+    height: 3px;
+    background-color: #0059C8;
+    text-align: right;
+    transition: width 0.4s ease-in-out;
+    border-radius: 8px;
+  }
+  
+  .progressBarText {
+    padding-right: 5px;
+    color: white;
+    font-weight: bold;
+  }
