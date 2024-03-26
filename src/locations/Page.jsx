@@ -567,7 +567,7 @@ const Page = () => {
         // create and publish entry, transcoding starts there
         const publishedEntry = await createAndPublishEntry(publishedAsset);
 
-        return;
+        // return;
 
 
         if(publishedEntry){
@@ -618,7 +618,7 @@ const Page = () => {
       contentType = await sdk.cma.contentType.get({contentTypeId});
       const allFieldsList = contentType.fields
 
-      console.log(`allFieldsList: `, allFieldsList);
+      //console.log(`allFieldsList: `, allFieldsList);
 
       // Extract IDs from the first list
       const idsFieldsToShow = new Set(fieldsToShowList.map(item => item.id));
