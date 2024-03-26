@@ -1,6 +1,6 @@
 import React, {useState, useCallback, useEffect} from 'react';
 // import { Paragraph } from '@contentful/f36-components';
-import { Form, FormControl, Heading, Paragraph, Flex, Card, Text, Spinner} from '@contentful/f36-components';
+import { Form, FormControl, TextInput, Datepicker, Autocomplete, Stack, Radio, Heading, Paragraph, Flex, Card, Text, Spinner} from '@contentful/f36-components';
 import { DoneIcon } from '@contentful/f36-icons';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 
@@ -29,6 +29,76 @@ const Page = () => {
   const { CMA_token } = sdk.parameters.installation;
 
   const CONTENT_TYPE_ID = 'qencodeTranscodedAsset'
+  const FIELDS_TO_SHOW_TYPE_ID = 'fieldsToShow' 
+
+  const [fieldsToUpdate, setFieldsToUpdate] = useState([]);
+
+  // const handleChange = (id, newValue) => {
+  //   setFieldsToUpdate(fieldsToUpdate.map(field => 
+  //       field.id === id ? { ...field, value: newValue } : field
+  //   ));
+  // };
+
+  const handleChange = (id, newValue) => {
+    //console.log("newValue: ", newValue)
+    // Determine if the new value should be converted to a number
+    const fieldToUpdate = fieldsToUpdate.find(field => field.id === id);
+    let convertedValue = newValue;
+  
+    // If the field type is Integer, try converting newValue to a number
+    if (fieldToUpdate && fieldToUpdate.type === "Integer") {
+      const parsedValue = parseInt(newValue);
+      // Check if the parsedValue is a number before assigning
+      convertedValue = isNaN(parsedValue) ? newValue : parsedValue;
+    }
+
+    // If the field type is Number, try converting newValue to a number
+    if (fieldToUpdate && fieldToUpdate.type === "Number") {
+      const parsedValue = parseFloat(newValue);
+      // Check if the parsedValue is a number before assigning
+      convertedValue = isNaN(parsedValue) ? newValue : parsedValue;
+    }
+
+    // If the field type is Date, try converting newValue to a date
+    // if (fieldToUpdate && fieldToUpdate.type === "Date") {
+    //   const parsedValue = newValue;
+    //   convertedValue = parsedValue ? newValue : new Date();
+    // }
+
+    //console.log("convertedValue: ", convertedValue)
+
+
+    // in case there is range of values
+    // if (fieldToUpdate && fieldToUpdate.type === "Symbol" && fieldToUpdate.range && fieldToUpdate.range.length > 0 && fieldToUpdate.filteredRange) {
+    //   const newFilteredRange = fieldToUpdate.range.filter((item) =>
+    //     item.toLowerCase().includes(convertedValue.toLowerCase()),
+    //   );
+    // }
+  
+    // original
+    // setFieldsToUpdate(fieldsToUpdate.map(field => 
+    //   field.id === id ? { ...field, value: convertedValue } : field
+    // ));
+
+
+    setFieldsToUpdate(fieldsToUpdate.map(field => {
+      // Check if this is the field to update and if it should filter the range
+      if (field.id === id) {
+        let updatedField = { ...field, value: convertedValue };
+        
+        // If the field has a range and it's a Symbol type, filter the range based on newValue
+        if (field.type === "Symbol" && field.range && field.range.length > 0) {
+          updatedField.filteredRange = field.range.filter(item =>
+            item.toLowerCase().includes(convertedValue.toLowerCase())
+          );
+        }
+  
+        return updatedField;
+      }
+  
+      return field;
+    }));    
+  };  
 
   // Filter templates where 'enabled' field is true
   const enabledTemplates = templates.filter(template => template.enabled === true);
@@ -279,8 +349,38 @@ const Page = () => {
             },
           },
           // Add other fields as needed
+          // description: {
+          //   'en-US': "Test description 2",
+          // },
+          // gated: {
+          //   'en-US': true,
+          // },
         },
       };
+
+      // adding fields and values from user input
+      // fieldsToUpdate.forEach(field => {
+      //   entryProps.fields[field.id] = {'en-US': field.value};
+      // });
+
+      // // adding fields and values from user input
+      // fieldsToUpdate.forEach(field => {
+      //   if (field.value !== undefined) {
+      //     entryProps.fields[field.id] = {'en-US': field.value};
+      //   }
+      // });
+
+      // adding fields and values from user input
+      fieldsToUpdate.forEach(field => {
+        // Proceed if the value is defined
+        if (field.value !== undefined) {
+          // Check if range is undefined, or if the value is within the range
+          if (!field.range || (field.range && field.range.includes(field.value))) {
+            entryProps.fields[field.id] = {'en-US': field.value};
+          }
+        }
+      });      
+      
 
       const entry = await sdk.cma.entry.create({ contentTypeId: CONTENT_TYPE_ID }, entryProps);
       console.log("Entry created: ", entry);
@@ -297,7 +397,7 @@ const Page = () => {
     } catch (error) {
       console.error('Error creating or publishing entry:', error);
     }
-  },[sdk.cma.entry]);
+  },[sdk.cma.entry, fieldsToUpdate]);
 
 
   async function customUploadMethod(file, accessToken, spaceId, environmentId, onProgress) {
@@ -467,18 +567,25 @@ const Page = () => {
         // create and publish entry, transcoding starts there
         const publishedEntry = await createAndPublishEntry(publishedAsset);
 
-        console.log('Published Entry:', publishedEntry);
-
-        // setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, entryPublished: true } : item));
-        setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "entry published" } : item));
+        return;
 
 
-        // start transcoding after asset is published
-        const videoSrc = publishedAsset.fields.file["en-US"].url;
-        startTranscodingForTemplates(publishedEntry, videoSrc)
+        if(publishedEntry){
+          console.log('Published Entry:', publishedEntry);
 
-        // setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, transcodingStarted: true } : item));
-        setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "transcoding started" } : item));
+          // setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, entryPublished: true } : item));
+          setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "entry published" } : item));
+
+          // start transcoding after asset is published
+          const videoSrc = publishedAsset.fields.file["en-US"].url;
+          startTranscodingForTemplates(publishedEntry, videoSrc)
+
+          // setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, transcodingStarted: true } : item));
+          setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "transcoding started" } : item));
+        } else {
+          console.error(`Failed to upload and publish entry`);
+        }
+
 
 
       } catch (error) {
@@ -498,11 +605,43 @@ const Page = () => {
   // Wrap the fetch function with useCallback to memoize it
   const fetchContentTypeFields = useCallback(async () => {
     try {
-      // Replace 'yourContentTypeId' with your actual content type ID
-      const contentTypeId = CONTENT_TYPE_ID;
-      const contentType = await sdk.cma.contentType.get({contentTypeId});
 
-      console.log('Fields for content type:', contentType.fields);
+      // get fiels that user wants to update from specific content type
+      let contentTypeId = FIELDS_TO_SHOW_TYPE_ID;
+      let contentType = await sdk.cma.contentType.get({contentTypeId});
+      const fieldsToShowList = contentType.fields
+
+      //console.log('fieldsToShowList:', fieldsToShowList);
+
+      // get all fields in main content type
+      contentTypeId = CONTENT_TYPE_ID;
+      contentType = await sdk.cma.contentType.get({contentTypeId});
+      const allFieldsList = contentType.fields
+
+      console.log(`allFieldsList: `, allFieldsList);
+
+      // Extract IDs from the first list
+      const idsFieldsToShow = new Set(fieldsToShowList.map(item => item.id));
+
+      // Filter the second list based on matching IDs
+      const filteredList = allFieldsList.filter(item => idsFieldsToShow.has(item.id))
+      .map(item => ({
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        value: item.defaultValue ? item.defaultValue["en-US"] : undefined,
+        range: item.validations?.find(validation => validation.in)?.in,
+        filteredRange: item.validations?.find(validation => validation.in)?.in
+      }));
+
+        //value: item.defaultValue ? item.defaultValue["en-US"] : (item.type === "Date" ? new Date() : (item.type === "Symbol" ? "" : false))
+        //value: item.defaultValue ? item.defaultValue["en-US"] : ''
+        //value: item.defaultValue && item.defaultValue["en-US"] !== undefined ? item.defaultValue["en-US"] : (item.type === "Symbol" ? "" : false)
+
+      // get only fields from main content type specidied in content type used as filter
+      console.log("filteredList: ", filteredList)
+      setFieldsToUpdate(filteredList)
+
     } catch (error) {
       console.error('Error fetching content type fields:', error);
     }
@@ -513,7 +652,6 @@ const Page = () => {
     fetchContentTypeFields();
   }, [fetchContentTypeFields]);
  
-
   return (
     <div>
       {/* <input type="file" multiple onChange={handleFileChangeProgress} /> */}
@@ -528,7 +666,6 @@ const Page = () => {
 
           <Form>
             <FormControl>
-              {/* <TextInput type="file" multiple onChange={handleFileChangeProgress} />  */}
               <DragAndDropUpload onFilesAdded={handleFileChangeProgress} />
             </FormControl>
           </Form>   
@@ -562,8 +699,95 @@ const Page = () => {
           </Flex >
 
         </Flex>
-        <Flex flexDirection='column' padding='spacingL'>
+        <Flex flexDirection='column' padding='spacingL' style={{minWidth:"240px"}}>
           <Heading>Fields</Heading>
+          <Paragraph>
+            Values will be applied to all entries
+          </Paragraph>
+          <Form>
+              {fieldsToUpdate.map(field => (
+                  <div key={field.id}>
+                      {field.type === 'Symbol' && !field.range && (
+                          <FormControl>
+                              <FormControl.Label>{field.name}</FormControl.Label>
+                              <TextInput 
+                                  type="text"
+                                  value={field.value ? field.value : ''}
+                                  onChange={(e) => handleChange(field.id, e.target.value)}
+                              />
+                          </FormControl>
+                      )}
+                      {field.type === 'Symbol' && field.range && (field.range.length > 0) && (
+                          <FormControl>
+                              <FormControl.Label>{field.name}</FormControl.Label>
+                              <Autocomplete
+                                items={field.filteredRange}
+                                onInputValueChange={(value) => handleChange(field.id, value)}
+                                onSelectItem={(value) => handleChange(field.id, value)}
+                              />
+                          </FormControl>
+                      )}                      
+                      {field.type === 'Integer' && (
+                          <FormControl>
+                              <FormControl.Label>{field.name}</FormControl.Label>
+                              <TextInput 
+                                  type="number"
+                                  value={field.value ? field.value : ''}
+                                  onChange={(e) => handleChange(field.id, e.target.value)}
+                              />
+                          </FormControl>
+                      )}
+                      {field.type === 'Boolean' && (
+                          <FormControl>
+                              <FormControl.Label>{field.name}</FormControl.Label>
+                              <Stack flexDirection="row">
+                                <Radio
+                                  name={field.id}
+                                  value={field.value === true}
+                                  isChecked={field.value === true}
+                                  onChange={() => handleChange(field.id, true)}
+                                >
+                                  Yes
+                                </Radio>
+                                <Radio
+                                  name={field.id}
+                                  value={field.value === false}
+                                  isChecked={field.value === false}
+                                  onChange={() => handleChange(field.id, false)}
+                                >
+                                  No
+                                </Radio>
+                              </Stack>         
+                          </FormControl>
+                      )}
+                      {field.type === 'Number' && (
+                          <FormControl>
+                              <FormControl.Label>{field.name}</FormControl.Label>
+                              <TextInput 
+                                  type="number"
+                                  value={field.value ? field.value : ''}
+                                  onChange={(e) => handleChange(field.id, e.target.value)}
+                              />
+                          </FormControl>
+                      )}
+                      {field.type === 'Date' && (
+                          <FormControl>
+                              <FormControl.Label>{field.name}</FormControl.Label>
+                              {/* <Datepicker 
+                                  selected={field.value ? new Date(field.value) : new Date()}  
+                                  //selected={new Date(field.value)}                          
+                                  onSelect={(value) => handleChange(field.id, value)}
+                              /> */}
+                            <Datepicker
+                              selected={field.value ? new Date(field.value) : null}
+                              placeholderText="Select a date"
+                              onSelect={(date) => handleChange(field.id, date)}
+                            />                              
+                          </FormControl>
+                      )}                      
+                  </div>
+              ))}              
+          </Form>
         </Flex>
       </Flex>
 

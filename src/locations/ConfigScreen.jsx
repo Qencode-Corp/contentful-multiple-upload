@@ -64,11 +64,44 @@ const ConfigScreen = () => {
     const subsContentTypeID = "subsItem";
     const subsContentTypeName = "Subtitles Item";
 
+    // use this content type to track what fields to make visible
+    const fieldsToShowContentTypeID = "fieldsToShow";
+    const fieldsToShowContentTypeName = "Fields to show";
+
     try {
       // Check if the content type already exists
 
       // Check if the content type exists
       const contentTypes = await sdk.cma.contentType.getMany();
+
+
+      // Check and create SRT content type
+      const fieldsToShowContentTypeExists = contentTypes.items.some((contentType) => contentType.sys.id === fieldsToShowContentTypeID);
+
+      if (fieldsToShowContentTypeExists) {
+        console.log(`Content type with ID "${fieldsToShowContentTypeID}" exists.`);
+      }       
+
+      if (!fieldsToShowContentTypeExists) {
+        const newContentType = await sdk.cma.contentType.createWithId({
+          contentTypeId: fieldsToShowContentTypeID
+        }, {
+          name: fieldsToShowContentTypeName,
+          fields: []
+        });
+
+        console.log(`Content type "${newContentType.name}" created with ID "${newContentType.sys.id}".`);
+
+        // publish this new content type
+        const publishedContentType = await sdk.cma.contentType.publish({
+            contentTypeId: newContentType.sys.id
+          }, newContentType)
+        console.log(`Content type "${publishedContentType.name}" published with ID "${publishedContentType.sys.id}".`);        
+
+        // await sdk.cma.contentType.publish({ contentTypeId: subsContentTypeID }, srtContentType);
+      }
+
+
 
       // Check and create SRT content type
       const subsContentTypeExists = contentTypes.items.some((contentType) => contentType.sys.id === subsContentTypeID);
