@@ -29,7 +29,7 @@ const Page = () => {
   const { CMA_token } = sdk.parameters.installation;
 
   const CONTENT_TYPE_ID = 'qencodeTranscodedAsset'
-  const FIELDS_TO_SHOW_TYPE_ID = 'fieldsToShow' 
+  const FIELDS_TO_SHOW_TYPE_ID = 'qencodeFields' 
 
   const [fieldsToUpdate, setFieldsToUpdate] = useState([]);
 

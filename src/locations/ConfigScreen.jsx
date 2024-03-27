@@ -65,8 +65,8 @@ const ConfigScreen = () => {
     const subsContentTypeName = "Subtitles Item";
 
     // use this content type to track what fields to make visible
-    const fieldsToShowContentTypeID = "fieldsToShow";
-    const fieldsToShowContentTypeName = "Fields to show";
+    const fieldsToShowContentTypeID = "qencodeFields";
+    const fieldsToShowContentTypeName = "Qencode Fields";
 
     try {
       // Check if the content type already exists
