@@ -1,66 +1,38 @@
-This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
+# Build
 
-## Available Scripts
+Run `npm run build` to build the app and serve the app from `build` folder.
 
-In the project directory, you can run:
+# Installation 
 
-#### `npm start`
+In your Contentful space go to **Apps** -> **Custom apps** https://app.contentful.com/spaces/[Space_ID]/apps/list/custom 
+and click **Manage app definitions** https://app.contentful.com/account/organizations/[Organization_ID]/apps 
+where you click **Create app** button
 
-Creates or updates your app definition in Contentful, and runs the app in development mode.
-Open your app to view it in the browser.
+In the form provide **Name**, for example *mult-upload*. For **Frontend** field put url to where your app is served, 
+for example *https://contentful.example.com*
 
-The page will reload if you make edits.
-You will also see any lint errors in the console.
+For Locations select checkboxes for: 
+*App configuration screen*
+*Entry Field* -> *JSON object*
+*Entry sidebar*
+*Page* and check *Show app in main navigation* and provide link name, for example *mult-upload*
 
-#### `npm run build`
+Click **Save** button to save app definition
 
-Builds the app for production to the `build` folder.
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Go back to apps list https://app.contentful.com/account/organizations/[Organization_ID]/apps Find created app in the list, click three dots menu and select **Install to space** If all is fine you will see installed app configuration screen.
 
-The build is minified and the filenames include the hashes.
-Your app is ready to be deployed!
+Enter valid Qencode API into *API Key* field and click **Validate** button. Your Qencode Transcoding templates will be loaded. Choose one or multiple templates you want to use for transcoding.
 
-#### `npm run upload`
+Click *CMA Token (Optional)* checkbox to display a field to enter your Contentful CMA Token which is needed for the app. You can create CMA token by clicking *Settings* in top right corner of Contentful UI and select *CMA Tokens*
 
-Uploads the build folder to contentful and creates a bundle that is automatically activated.
-The command guides you through the deployment process and asks for all required arguments.
-Read [here](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/#deploy-with-contentful) for more information about the deployment process.
+Click **Install to selected enviroments** or **Save** button. 
 
-#### `npm run upload-ci`
+The main page for multiple upload will be available in dropdown when clicking *Apps* in Contentful navigation with same name that you put when enabling *Page* location, for example *mult-upload*
 
-Similar to `npm run upload` it will upload your app to contentful and activate it. The only difference is  
-that with this command all required arguments are read from the environment variables, for example when you add
-the upload command to your CI pipeline.
+During installation app will create Content Types that you can rename if needed. Main Content Type is called 'Video' with ID *qencodeTranscodedAsset*. You need to set up apearence for that Content Type. Find 'Video' in the list of Content Types in Content Model https://app.contentful.com/spaces/[Space_ID]/environments/master/content_types See details here https://docs.qencode.com/tutorials/integrations/contentful-app/#5-content-model In fields list find *Transcoding Data*, click *Edit*, scroll down to *Appearence* and select installed app, *mult-upload* for example and click **Confirm** button. In the same Content Model click *Sidebar*, fined installed app, 'mult-upload' for example, and click plus icon and click **Save** button. You can add different fields to this Content Moled if needed.
 
-For this command to work, the following environment variables must be set:
+During app installation, there is also *Subtitles Item* Content Model created for optional Subtitle items.
 
-- `CONTENTFUL_ORG_ID` - The ID of your organization
-- `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
-- `CONTENTFUL_ACCESS_TOKEN` - A personal [access token](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens)
+App also creates **Qencode Fields** Content Model which works as a tracker indicating what fields you what to be displayed in this app Multiple Upload screen. For example if you add *Description* field to *Video* Content Model and want this field to be displayed on the page for multiple upload you should add text type Field called *Description* in **Qencode Fields**. These fields type are supported: *Short text*, *Boolean*, *Integer*, *Decimal number*, *Date & time*... If you add *Integer* field to *Video* content model and what this field to be displayed, you just add field with same name (field id) to **Qencode Fields** but it must be *Short text* type. Fields to be displayed should match by name (field id).
 
-## Libraries to use
-
-To make your app look and feel like Contentful use the following libraries:
-
-- [Forma 36](https://f36.contentful.com/) – Contentful's design system
-- [Contentful Field Editors](https://www.contentful.com/developers/docs/extensibility/field-editors/) – Contentful's field editor React components
-
-## Using the `contentful-management` SDK
-
-In the default create contentful app output, a contentful management client is
-passed into each location. This can be used to interact with Contentful's
-management API. For example
-
-```js
-// Use the client
-cma.locale.getMany({}).then((locales) => console.log(locales));
-```
-
-Visit the [`contentful-management` documentation](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#using-the-contentful-management-library)
-to find out more.
-
-## Learn More
-
-[Read more](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/) and check out the video on how to use the CLI.
-
-Create Contentful App uses [Create React App](https://create-react-app.dev/). You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started) and how to further customize your app.
+So you can specified fields to be displayed and enter some values for those fields... When you drop files to file upload area values from updated fiels will be applied to all entries... After file is dropped this process starts: file gets uploaded to Contentful, asset gets crated, processed and published, media entry gets created and published based on that asset, and finally entry of *Video* content type gets created and published and transcoding job is started via Qencode API. The process runs independently for all files dropped into the area for file upload.
