@@ -1,0 +1,19 @@
+.container{
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.jobStatus{
+    display: flex;
+    justify-content: space-between;
+}
+
+.header{
+
+}
+
+.error{
+    color: #BD002A;
+}

@@ -14,6 +14,8 @@ import ProgressBar from '../components/ProgressBar';
 import { RandomizedFileName } from '../utils/filenameUtils';
 import { QencodeApiRequest } from '../services/api';
 
+import TranscodingProgress from '../components/TranscodingProgress';
+
 const Page = () => {
   const sdk = useSDK();
 
@@ -127,209 +129,324 @@ const Page = () => {
     }
   },[sdk]);
   
+  // Function to initialize the Qencode API client
+  const getAccessToken = useCallback( async () => {
+    try {
+      // const qencodeApiClient = new QencodeApiClient(apikeyqencodeApiKey);
 
-  const startTranscodingForTemplates = useCallback(async (publishedEntry, videoSrc) => {
-    console.log("apikeyqencodeApiKey: ", apikeyqencodeApiKey)
-    console.log("videoSrc: ", videoSrc)
+      const result = await QencodeApiRequest("access_token", {
+        api_key: apikeyqencodeApiKey,
+      });
 
-    // Function to initialize the Qencode API client
-    const getAccessToken = async () => {
-      try {
-        // const qencodeApiClient = new QencodeApiClient(apikeyqencodeApiKey);
-
-        const result = await QencodeApiRequest("access_token", {
-          api_key: apikeyqencodeApiKey,
-        });
-
-        return result;
-      } catch (error) {
-        console.error('Error getting Qencode access token:', error);
-        return null;
-      }
-    };
-
-    // Function to create task
-    const createTask = async (token) => {
-      try {
-        const result = await QencodeApiRequest("create_task", {
-            token: token,
-        });        
-
-        return result;
-      } catch (error) {
-        console.error('Error creating Qencode task:', error);
-        return null;
-      }
-    };
-
-    // Function to start transcoding job
-    const startTranscoding = async (task_token, queryJSON) => {
-      try {        
-        let result = await QencodeApiRequest("start_encode2", {
-          task_token: task_token,
-          query: queryJSON,
-          payload: 'contentful'
-        });        
-
-        return result;
-      } catch (error) {
-        console.error('Error creating Qencode task:', error);
-        return null;
-      }
-    };      
-
-    // initialize task_data that will be added to entry
-    let task_data = {
-      transcodingStarted: true,
-      videoSrc: videoSrc
+      return result;
+    } catch (error) {
+      console.error('Error getting Qencode access token:', error);
+      return null;
     }
+  },[apikeyqencodeApiKey])
 
-    const { error, message, token }  = await getAccessToken();
-    console.log("access token: ", token)
+  // Function to create task
+  const createTask = useCallback(async (token) => {
+    try {
+      const result = await QencodeApiRequest("create_task", {
+          token: token,
+      });        
 
-    if (error !== 0 && message) {
-      console.error("Error getting access token:", message);
-      task_data.error = message
-      // Update task_data field with the error message
-      await updateTaskData(publishedEntry.sys.id, task_data);
-      return; // Exit if there's an error
+      return result;
+    } catch (error) {
+      console.error('Error creating Qencode task:', error);
+      return null;
     }
+  },[])
+
+  // Function to start transcoding job
+  const startTranscoding = useCallback(async (task_token, queryJSON) => {
+    try {        
+      let result = await QencodeApiRequest("start_encode2", {
+        task_token: task_token,
+        query: queryJSON,
+        payload: 'contentful'
+      });        
+
+      return result;
+    } catch (error) {
+      console.error('Error creating Qencode task:', error);
+      return null;
+    }
+  },[])
+
+  // const startTranscodingForTemplates = useCallback(async (publishedEntry, videoSrc, index) => {
+  //   console.log("apikeyqencodeApiKey: ", apikeyqencodeApiKey)
+  //   console.log("videoSrc: ", videoSrc)
+
+  //   // initialize task_data that will be added to entry
+  //   let task_data = {
+  //     transcodingStarted: true,
+  //     videoSrc: videoSrc
+  //   }
+
+  //   const { error, message, token }  = await getAccessToken();
+  //   console.log("access token: ", token)
+
+  //   if (error !== 0 && message) {
+  //     console.error("Error getting access token:", message);
+  //     task_data.error = message
+  //     // Update task_data field with the error message
+  //     await updateTaskData(publishedEntry.sys.id, task_data);
+  //     setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "error", taskData: task_data } : item));
+  //     return; // Exit if there's an error
+  //   }
 
 
-    let transcodingJobs = []; // Temporary array to hold new transcoding jobs
+  //   let transcodingJobs = []; // Temporary array to hold new transcoding jobs
 
-    // all transcoding will be here
-    if (error === 0 && token) {
-      // Rest of your transcoding logic
-      for (let template of enabledTemplates) {
-        console.log("Start transcoding job for template...")
+  //   // all transcoding will be here
+  //   if (error === 0 && token) {
+  //     // Rest of your transcoding logic
+  //     for (let template of enabledTemplates) {
+  //       console.log("Start transcoding job for template...")
 
-        /////////////////////////////////////////////////////////
+  //       /////////////////////////////////////////////////////////
 
-        const { error, task_token, message }  = await createTask(token);
-        console.log("task_token: ", task_token)
+  //       const { error, task_token, message }  = await createTask(token);
+  //       console.log("task_token: ", task_token)
 
-        if (error !== 0 && message) {
-          task_data.error = message
-          await updateTaskData(publishedEntry.sys.id, task_data);
-          return;
-        }
+  //       if (error !== 0 && message) {
+  //         task_data.error = message
+  //         await updateTaskData(publishedEntry.sys.id, task_data);
+  //         setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "error", taskData: task_data } : item));
+  //         return;
+  //       }
 
-        if (error === 0 && task_token) {
-          // start transcoding
-          // https://www.radiantmediaplayer.com/media/big-buck-bunny-360p.mp4
+  //       if (error === 0 && task_token) {
+  //         // start transcoding
+  //         // https://www.radiantmediaplayer.com/media/big-buck-bunny-360p.mp4
 
-          // transoding based on source file as url
+  //         // transoding based on source file as url
 
-          let query = JSON.parse(template.query);
+  //         let query = JSON.parse(template.query);
 
-          query.query.source = `https:${videoSrc}`;
+  //         query.query.source = `https:${videoSrc}`;
 
-          let uuid = uuidv4();    
+  //         let uuid = uuidv4();    
 
-          query.query.format = query.query.format.map((format) => {
+  //         query.query.format = query.query.format.map((format) => {
 
-            let { destination, output, file_extension, image_format } = format;
+  //           let { destination, output, file_extension, image_format } = format;
 
-            if (destination) {
-              // destination can be object or can be array of objects
-              if (typeof destination === "object") {
-                destination.url = RandomizedFileName({
-                  url: destination.url,
-                  output, 
-                  file_extension, 
-                  image_format,
-                  uuid
-                });                
-              } else {
-                // this is array of objects
-                destination = destination.map((item) => {
-                  item.url = RandomizedFileName({
-                      url: item.url,
-                      output, 
-                      file_extension, 
-                      image_format,
-                      uuid
-                  });                  
-                  return item;
-                });
-              }
-            }
+  //           if (destination) {
+  //             // destination can be object or can be array of objects
+  //             if (typeof destination === "object") {
+  //               destination.url = RandomizedFileName({
+  //                 url: destination.url,
+  //                 output, 
+  //                 file_extension, 
+  //                 image_format,
+  //                 uuid
+  //               });                
+  //             } else {
+  //               // this is array of objects
+  //               destination = destination.map((item) => {
+  //                 item.url = RandomizedFileName({
+  //                     url: item.url,
+  //                     output, 
+  //                     file_extension, 
+  //                     image_format,
+  //                     uuid
+  //                 });                  
+  //                 return item;
+  //               });
+  //             }
+  //           }
 
-            console.log("format: ", format)
+  //           console.log("format: ", format)
 
-            return format;
-          });
+  //           return format;
+  //         });
 
-          //console.log("query: ", query)
+  //         //console.log("query: ", query)
 
-          let queryJSON = JSON.stringify(query);
+  //         let queryJSON = JSON.stringify(query);
 
-          console.log("queryJSON: ", queryJSON)
+  //         console.log("queryJSON: ", queryJSON)
 
-          const transcodingResult = await startTranscoding(task_token, queryJSON);
-          console.log("transcodingResult: ", transcodingResult)
+  //         const transcodingResult = await startTranscoding(task_token, queryJSON);
+  //         console.log("transcodingResult: ", transcodingResult)
 
-          let { status_url, error: transcodingError, message } = transcodingResult;
+  //         let { status_url, error: transcodingError, message } = transcodingResult;
 
-          if (transcodingError !== 0 && message) {
-            task_data.error = message
-            await updateTaskData(publishedEntry.sys.id, task_data);
-            return;
-          }
+  //         if (transcodingError !== 0 && message) {
+  //           task_data.error = message
+  //           await updateTaskData(publishedEntry.sys.id, task_data);
+  //           return;
+  //         }
 
-          if (transcodingError === 0 && status_url) {
-            // setTranscodingJobs
-            const newTranscodingJob = {
-                taskToken: task_token,
-                statusUrl: status_url,
-                templateName: template.name,
-            }
+  //         if (transcodingError === 0 && status_url) {
+  //           // setTranscodingJobs
+  //           const newTranscodingJob = {
+  //               taskToken: task_token,
+  //               statusUrl: status_url,
+  //               templateName: template.name,
+  //           }
 
-            transcodingJobs.push(newTranscodingJob); // Add to temporary array
+  //           transcodingJobs.push(newTranscodingJob); // Add to temporary array         
 
-            // // Retrieve the current task_data, if it exists
-            // let currentTaskData = publishedEntry.fields.task_data ? publishedEntry.fields.task_data['en-US'] : {};
-            // currentTaskData.transcodingJobs = currentTaskData.transcodingJobs || [];
-            // currentTaskData.transcodingJobs.push(newTranscodingJob);
-
-            // // Update task_data field
-            // await updateTaskData(publishedEntry.sys.id, currentTaskData);           
-
-          }
-        }
+  //         }
+  //       }
 
 
-      }
+  //     }
   
-      // After all jobs are processed, update task_data with the complete transcodingJobs array
-      try {
-        // let currentEntry = await sdk.cma.entry.get({ entryId: publishedEntry.sys.id });
-        // let currentTaskData = currentEntry.fields.task_data ? currentEntry.fields.task_data['en-US'] : {};
+  //     // After all jobs are processed, update task_data with the complete transcodingJobs array
+  //     try {
+  //       task_data.transcodingJobs = transcodingJobs;
+  //       await updateTaskData(publishedEntry.sys.id, task_data);   
+  //       setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "transcoding", taskData: task_data } : item));
 
-        // // Merge existing transcodingJobs with new ones
-        // const updatedTranscodingJobs = currentTaskData.transcodingJobs ? [...currentTaskData.transcodingJobs, ...transcodingJobs] : transcodingJobs;
-        // currentTaskData.transcodingJobs = updatedTranscodingJobs;
+  //     } catch (error) {
+  //       console.error('Error updating entry with transcodingJobs:', error);
+  //     } 
 
-        task_data.transcodingJobs = transcodingJobs;
-        await updateTaskData(publishedEntry.sys.id, task_data);   
-
-        // // Update the entry in Contentful
-        // currentEntry.fields.task_data = { 'en-US': currentTaskData };
-        // const updatedEntry = await sdk.cma.entry.update({
-        //   entryId: publishedEntry.sys.id,
-        //   version: currentEntry.sys.version, // It's important to provide the current version
-        // }, currentEntry);
-
-        //console.log("Entry updated with all transcodingJobs: ", updatedEntry);
-      } catch (error) {
-        console.error('Error updating entry with transcodingJobs:', error);
-      } 
-
-    }
+  //   }
 
 
-  }, [apikeyqencodeApiKey, enabledTemplates, updateTaskData]);  
+  // }, [apikeyqencodeApiKey, enabledTemplates, updateTaskData, getAccessToken, createTask, startTranscoding]);  
+
+  const startTranscodingForTemplates = useCallback(async (publishedEntry, videoSrc, index) => {
+      console.log("apikeyqencodeApiKey: ", apikeyqencodeApiKey);
+      console.log("videoSrc: ", videoSrc);
+
+      let task_data = {
+          transcodingStarted: true,
+          videoSrc: videoSrc,
+          transcodingJobs: [],
+          error: null
+      };
+
+      const { error, message, token } = await getAccessToken();
+      console.log("access token: ", token);
+
+      if (error !== 0 && message) {
+          console.error("Error getting access token:", message);
+          task_data.error = message;
+          await updateTaskData(publishedEntry.sys.id, task_data);
+          setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "error", taskData: task_data } : item));
+          return;
+      }
+
+      if (error === 0 && token) {
+          for (let template of enabledTemplates) {
+              console.log("Start transcoding job for template...");
+
+              const { error, task_token, message } = await createTask(token);
+              console.log("task_token: ", task_token);
+
+              if (error !== 0 && message) {
+                  task_data.error = message;
+                  await updateTaskData(publishedEntry.sys.id, task_data);
+                  setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "error", taskData: task_data } : item));
+                  return;
+              }
+
+              if (error === 0 && task_token) {
+                  let query = JSON.parse(template.query);
+                  query.query.source = `https:${videoSrc}`;
+
+                  let uuid = uuidv4();  
+                  
+                  query.query.format = query.query.format.map(format => {
+                    let { destination } = format; // Changed to let for reassignment
+                    const { output, file_extension, image_format } = format;
+                    
+                    // Check if destination exists before trying to modify it
+                    if (destination) {
+                      if (typeof destination === "object" && destination.url) {
+                        // Check if destination is a single object and has a URL to modify
+                        destination.url = RandomizedFileName({
+                          url: destination.url,
+                          output,
+                          file_extension,
+                          image_format,
+                          uuid
+                        });
+                      } else if (Array.isArray(destination)) {
+                        // Check if destination is an array of objects and modify each one
+                        destination = destination.map(item => {
+                          if (item.url) {  // Ensure there is a URL to modify
+                            return RandomizedFileName({
+                              url: item.url,
+                              output,
+                              file_extension,
+                              image_format,
+                              uuid
+                            });
+                          }
+                          return item;  // Return item unmodified if no URL is present
+                        });
+                      }
+                    }
+                  
+                    // Ensure that the destination changes are reflected in the original format object
+                    format.destination = destination;
+                    
+                    return format;
+                  });
+                                
+
+                  // query.query.format = query.query.format.map(format => {
+                  //     let { destination, output, file_extension, image_format } = format;
+                  //     if (typeof destination === "object") {
+                  //         destination.url = RandomizedFileName({
+                  //             url: destination.url,
+                  //             output, 
+                  //             file_extension, 
+                  //             image_format,
+                  //             uuid
+                  //         });                
+                  //     } else {
+                  //         destination = destination.map(item => RandomizedFileName({
+                  //             url: item.url,
+                  //             output, 
+                  //             file_extension, 
+                  //             image_format,
+                  //             uuid
+                  //         }));
+                  //     }
+                  //     return format;
+                  // });
+
+                  let queryJSON = JSON.stringify(query);
+
+                  const transcodingResult = await startTranscoding(task_token, queryJSON);
+                  console.log("transcodingResult: ", transcodingResult);
+
+                  if (transcodingResult.error !== 0 && transcodingResult.message) {
+                      task_data.error = transcodingResult.message;
+                      await updateTaskData(publishedEntry.sys.id, task_data);
+                      setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "error", taskData: task_data } : item));
+                      return;
+                  }
+
+                  if (transcodingResult.error === 0 && transcodingResult.status_url) {
+                      const newTranscodingJob = {
+                          taskToken: task_token,
+                          statusUrl: transcodingResult.status_url,
+                          templateName: template.name,
+                      };
+
+                      task_data.transcodingJobs.push(newTranscodingJob);
+                  }
+              }
+          }
+
+          try {
+              await updateTaskData(publishedEntry.sys.id, task_data);
+              setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "transcoding", taskData: task_data } : item));
+          } catch (error) {
+              console.error('Error updating entry with transcodingJobs:', error);
+          }
+      }
+  }, [apikeyqencodeApiKey, enabledTemplates, updateTaskData, getAccessToken, createTask, startTranscoding, setUploadProgress]);
 
 
   const createAndPublishEntry = useCallback(async (publishedAsset) => {
@@ -578,7 +695,7 @@ const Page = () => {
 
           // start transcoding after asset is published
           const videoSrc = publishedAsset.fields.file["en-US"].url;
-          startTranscodingForTemplates(publishedEntry, videoSrc)
+          startTranscodingForTemplates(publishedEntry, videoSrc, index)
 
           // setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, transcodingStarted: true } : item));
           setUploadProgress(prev => prev.map((item, idx) => idx === index ? { ...item, processingStatus: "transcoding started" } : item));
@@ -669,7 +786,7 @@ const Page = () => {
               <DragAndDropUpload onFilesAdded={handleFileChangeProgress} />
             </FormControl>
           </Form>   
-
+{/* 
           <Flex flexDirection="row" gap="spacingS" flexWrap="wrap">
             {uploadProgress.map(file => (
                 <Card key={file.name} style={{ marginBottom: '20px', width: "250px", minWdth: "250px" }}>
@@ -682,9 +799,7 @@ const Page = () => {
                     >
                       <strong>{file.name}</strong>
                     </div> 
-                    {/* <div>Progress: {file.progress}%</div> */}
                     <ProgressBar progress={file.progress} />
-                    {/* <div>File upload: {file.status}</div> */}
 
                     <Flex justifyContent="space-between" alignItems="center">
                       <Text marginRight="spacingXs">Status: {file.processingStatus}</Text>
@@ -692,11 +807,49 @@ const Page = () => {
                         (file.processingStatus !== "transcoding started") && (file.processingStatus !== "failed") &&
                         <Spinner size="small" />
                       }
+                      
                       { file.processingStatus === "transcoding started" && <DoneIcon />}               
                     </Flex> 
                 </Card>
             ))}         
-          </Flex >
+          </Flex > */}
+
+          <Flex flexDirection="row" gap="spacingS" flexWrap="wrap">
+            {uploadProgress.map(file => (
+              <Card key={file.name} style={{ marginBottom: '20px', width: "350px", minWidth: "350px" }}>
+                <div style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap"
+                }}>
+                  <strong>{file.name}</strong>
+                </div>
+                <ProgressBar progress={file.progress} />
+
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Text marginRight="spacingXs">Asset status: {file.processingStatus}</Text>
+                  {
+                    (file.processingStatus === "failed") && <span>Failed</span>                    
+                  }
+
+                  {
+                    file.processingStatus !== "transcoding" &&  <Spinner size="small" />
+                  }
+
+                  {
+                    file.processingStatus === "transcoding" && <DoneIcon />
+                  }
+                </Flex>
+
+                {
+                  file.processingStatus === "transcoding" &&
+                  <TranscodingProgress transcodingJobs={file.taskData.transcodingJobs} />
+                }
+
+              </Card>
+            ))}         
+          </Flex>
+
 
         </Flex>
         <Flex flexDirection='column' padding='spacingL' style={{minWidth:"240px"}}>
