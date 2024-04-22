@@ -296,49 +296,96 @@ const Sidebar = () => {
             language: sub.language
           }));       
 
-          query.query.format = query.query.format.map((format) => {
-            //let { destination } = format;
-            let { destination, output, file_extension, image_format } = format;
-
+          query.query.format = query.query.format.map(format => {
+            let { destination } = format; // Changed to let for reassignment
+            const { output, file_extension, image_format } = format;
+            
+            // Check if destination exists before trying to modify it
             if (destination) {
-              // destination can be object or can be array of objects
-              if (typeof destination === "object") {
-                //destination.url = RandomizedFileName(destination.url);
+              if (typeof destination === "object" && destination.url) {
+                // Check if destination is a single object and has a URL to modify
                 destination.url = RandomizedFileName({
                   url: destination.url,
-                  output, 
-                  file_extension, 
+                  output,
+                  file_extension,
                   image_format,
                   uuid
-                });                
-              } else {
-                // this is array of objects
-                destination = destination.map((item) => {
-                  //item.url = RandomizedFileName(item.url);
-                  item.url = RandomizedFileName({
+                });
+              } else if (Array.isArray(destination)) {
+                // Check if destination is an array of objects and modify each one
+                destination = destination.map(item => {
+                  if (item.url) {  // Ensure there is a URL to modify
+                    return RandomizedFileName({
                       url: item.url,
-                      output, 
-                      file_extension, 
+                      output,
+                      file_extension,
                       image_format,
                       uuid
-                  });                  
-                  return item;
+                    });
+                  }
+                  return item;  // Return item unmodified if no URL is present
                 });
               }
             }
+          
+            // Ensure that the destination changes are reflected in the original format object
+            format.destination = destination;
 
             // Add subtitles to format if subsDetails is defined and not empty
-            if (parsedSubsDetails.length > 0) {
+            if (parsedSubsDetails && parsedSubsDetails.length > 0) {
               format.subtitles = {
-                sources: subtitlesSources,
+                sources: subtitlesSources,  // Ensure subtitlesSources is defined outside this snippet
                 copy: 0 // Assuming 'copy' is a required property; adjust as necessary
               };
             }
-
-            console.log("format: ", format)
-
+            
             return format;
           });
+          
+
+          // query.query.format = query.query.format.map((format) => {
+          //   //let { destination } = format;
+          //   let { destination, output, file_extension, image_format } = format;
+
+          //   if (destination) {
+          //     // destination can be object or can be array of objects
+          //     if (typeof destination === "object") {
+          //       //destination.url = RandomizedFileName(destination.url);
+          //       destination.url = RandomizedFileName({
+          //         url: destination.url,
+          //         output, 
+          //         file_extension, 
+          //         image_format,
+          //         uuid
+          //       });                
+          //     } else {
+          //       // this is array of objects
+          //       destination = destination.map((item) => {
+          //         //item.url = RandomizedFileName(item.url);
+          //         item.url = RandomizedFileName({
+          //             url: item.url,
+          //             output, 
+          //             file_extension, 
+          //             image_format,
+          //             uuid
+          //         });                  
+          //         return item;
+          //       });
+          //     }
+          //   }
+
+            // // Add subtitles to format if subsDetails is defined and not empty
+            // if (parsedSubsDetails.length > 0) {
+            //   format.subtitles = {
+            //     sources: subtitlesSources,
+            //     copy: 0 // Assuming 'copy' is a required property; adjust as necessary
+            //   };
+            // }
+
+          //   console.log("format: ", format)
+
+          //   return format;
+          // });
 
           //console.log("query: ", query)
 
